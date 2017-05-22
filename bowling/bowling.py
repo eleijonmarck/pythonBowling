@@ -3,46 +3,32 @@
 # -*- coding: utf-8 -*- #
 
 
+def _create_frame(game, index):
+    if _is_strike(game, index):
+        return _create_strike(game, index)
+    if _is_spare(game, index):
+        return _is_spare(game, index)
+    return _create_normal_frame(game, index)
+
+
+def _create_strike(game, index):
+    look_ahead = 3
+    score = game.pins_knocked_down(index, look_ahead)
+    return Frame(score, 1)
+
+
 class Game(object):
-    def __init__(self):
-        self.total = 0
-        self.frames = Frame(12)
-        self.throws = 0
-        self.strikes_in_row = 0
+    def __init__(self, throws):
+        self._throws = throws
 
-    def score_game(self, played_game):
-        if not played_game:
-            return self.total
-        else:
-            for throw in played_game:
-                self.throws += 1
-                self.frame_total = throw
-                if (self.frame_total == 10) and (self.throws % 2 == 1):
-                    if self.strikes_in_row < 3:
-                        self.strikes_in_row += 1
-                    if (self.throws % 2 == 1):
-                        self.total += throw
-                        if self.strikes_in_row == 2:
-                            self.total += throw
-                            self.total += throw
-                        if self.strikes_in_row == 3:
-                            self.strikes_in_row = 2
-                            self.total += throw
-                            self.total += throw
-                    if (self.throws % 2 == 0):
-                        self.total = + throw
+    def _throw(self, index):
+        if index < len(self._throws):
+            return self._throws[index]
+        return 0
 
-                if (self.throws % 2 == 0):
-                    if (self.frame_total < 10):
-                        self.strikes_in_row = 0
-                    self.frame_total = 0
-
-                self.total += throw
-
-            if sum(played_game) == 120:
-                self.total += 20
-
-            return self.total
+    def pins_knocked_down(self, index, look_ahead):
+        throws_to_sum = map(self._throw, range(index, index + look_ahead))
+        return sum(throws_to_sum)
 
 
 class Frame(object):
